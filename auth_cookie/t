@@ -1,0 +1,13 @@
+http {
+	server {
+		listen       80;
+    server_name  localhost;
+    	location / {
+    		proxy_pass http://mytest;
+    		auth_count 100;
+    		auth_time 60;#60s 
+    		auth_flag on;#打开认证
+    	}
+    }
+
+}
