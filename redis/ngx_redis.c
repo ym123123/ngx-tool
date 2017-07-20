@@ -117,7 +117,10 @@ redisReader *ngx_redis_create_reader()
 void ngx_redis_destroy_reader(redisReader *reader)
 {
 	if (reader != NULL)
+	{
+		printf("%p %p\n", reader->reply, reader->fn);
 		redisReaderFree(reader);
+	}
 }
 
 ngx_int_t ngx_redis_parse_data(redisReader *reader, ngx_buf_t *buf, ngx_redis_reply_t **reply)
@@ -138,6 +141,7 @@ ngx_int_t ngx_redis_parse_data(redisReader *reader, ngx_buf_t *buf, ngx_redis_re
 	{
 		return NGX_AGAIN;
 	}
+	reader->reply = *reply;
 
 	return NGX_OK;
 }
