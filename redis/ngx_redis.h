@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include <hiredis/hiredis.h>
 struct redisReader;
 typedef redisReader ngx_redis_ctx_t;
 

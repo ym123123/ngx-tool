@@ -7,9 +7,6 @@
 
 #include <ngx_config.h>
 #include <ngx_core.h>
-#include <ngx_http.h>
-
-#include <hiredis/hiredis.h>
 
 #include "ngx_redis.h"
 
@@ -57,6 +54,7 @@ static ngx_buf_t *ngx_redis_command_argv(ngx_pool_t *pool, int argc, const char 
     size_t len;
     int totlen, j;
     ngx_buf_t *buf;
+    int pos;
 
     /* Calculate number of bytes needed for the command */
     totlen = 1+intlen(argc)+2;
@@ -69,15 +67,17 @@ static ngx_buf_t *ngx_redis_command_argv(ngx_pool_t *pool, int argc, const char 
     if (buf == NULL)
         return NULL;
 
-    buf->last = ngx_sprintf(buf->last, "*%d\r\n", argc);
-
+    pos = sprintf(((char *)buf->pos),"*%d\r\n",argc);
     for (j = 0; j < argc; j++) {
         len = argvlen ? argvlen[j] : strlen(argv[j]);
-        buf->last = ngx_sprintf(buf->last,"$%zu\r\n",len);
-        ngx_memcpy(buf->last, argv[j], len);
-        *buf->last++ = '\r';
-        *buf->last++ = '\n';
+        pos += sprintf(((char *)buf->pos)+pos,"$%zu\r\n",len);
+        memcpy(((char *)buf->pos)+pos,argv[j],len);
+        pos += len;
+        ((char *)buf->pos)[pos++] = '\r';
+        ((char *)buf->pos)[pos++] = '\n';
     }
+
+    buf->last += totlen;
 
     return buf;
 }
